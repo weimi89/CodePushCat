@@ -65,7 +65,7 @@ function App() {
         style={backgroundStyle}>
         <Header />
         <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1, padding: 10 }}>
-          <Text style={{ fontSize: 20, textAlign: 'center' }}>版本號 1.0.0</Text>
+          <Text style={{ fontSize: 20, textAlign: 'center' }}>版本號 1.0.1</Text>
           <Text style={{ fontSize: 20, textAlign: 'center' }}>{message}</Text>
           <Text style={{ fontSize: 20, textAlign: 'center' }}>{showProgress}</Text>
         </View>
