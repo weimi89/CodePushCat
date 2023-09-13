@@ -3,7 +3,23 @@ import { SafeAreaView, ScrollView, StatusBar, Text, useColorScheme, View } from 
 import codePush from 'react-native-code-push'
 import { Colors, Header } from 'react-native/Libraries/NewAppScreen'
 
-function App() {
+const CodePushOptions = {
+  // 檢查更新（ON_APP_START:啟動APP / ON_APP_RESUME:程序從後台控制  / MANUAL:手動控制）
+  checkFrequency: codePush.CheckFrequency.ON_APP_RESUME,
+  // 何時安裝（ON_NEXT_RESTART:下次程序啟動 / ON_NEXT_RESUME:下次程序從後台進入前台 / ON_NEXT_SUSPEND:在後台更新 / IMMEDIATE:立即更新，並重新啟動）
+  installMode: codePush.InstallMode.IMMEDIATE,
+  // 重啟之前，在後台待的最短時間
+  minimumBackgroundDuration: 0,
+  // 强制更新並啟動
+  mandatoryInstallMode: codePush.InstallMode.IMMEDIATE,
+  // 更新時的提示更新窗，iOS不支援
+  rollbackRetryOptions: {
+    delayInHours: 1, // rollback 重試，1小時/次
+    maxRetryAttempts: 24 // rollback 重試，最多嘗試24次
+  }
+}
+
+export default codePush(CodePushOptions)(() => {
 
   const [message, setMessage] = useState('正在檢查更新...')
   const [showProgress, setShowProgress] = useState('0%')
@@ -11,15 +27,15 @@ function App() {
   useEffect(() => {
     codePush.checkForUpdate()
       .then((remotePackage) => {
-        if (remotePackage) {
+        if (!remotePackage || remotePackage.failedInstall) {
+          setMessage('已是最新，不需要更新！')
+        } else {
           setMessage(`有新的更新！Version ${remotePackage.appVersion} (${(remotePackage.packageSize / 1024 / 1024).toFixed(2)}mb) is available for download`)
           syncInNonSilent(remotePackage)
-        } else {
-          setMessage('已是最新，不需要更新！')
         }
       })
       .catch((error) => console.log(error))
-  }, []);
+  }, [])
 
   const syncInNonSilent = (remotePackage) => {
     console.info('安裝更新並立刻重啟應用')
@@ -65,13 +81,11 @@ function App() {
         style={backgroundStyle}>
         <Header />
         <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1, padding: 10 }}>
-          <Text style={{ fontSize: 20, textAlign: 'center' }}>版本號 1.0.1</Text>
+          <Text style={{ fontSize: 20, textAlign: 'center' }}>版本號 1.0.4</Text>
           <Text style={{ fontSize: 20, textAlign: 'center' }}>{message}</Text>
           <Text style={{ fontSize: 20, textAlign: 'center' }}>{showProgress}</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
   )
-}
-
-export default codePush(App)
+})

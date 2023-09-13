@@ -1,6 +1,6 @@
 {
   "name": "CodePushCat",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
@@ -11,8 +11,8 @@
 
     "android:staging": "echo '安卓在本機安裝測試' && react-native run-android --mode=staging",
     "android:release": "echo '安卓在本機安裝正式' && react-native run-android --mode=release",
-    "android:push-staging": "echo '安卓測試發佈' && appcenter codepush release-react -d Staging -t '*' -a weimi/CodePushCat-android",
-    "android:push-release": "echo '安卓正式發佈' && appcenter codepush release-react -d Production -t '*' -a weimi/CodePushCat-android",
+    "android:push-staging": "echo '安卓測試發佈' && filePath=\"CodePushUpdateDesc.txt\" && fileContents=$(cat \"$filePath\") && echo \"更新說明：$fileContents\" && appcenter codepush release-react --description $fileContents -d Staging -t '~1.0.0' -a weimi/CodePushCat-android",
+    "android:push-release": "echo '安卓正式發佈' && filePath=\"CodePushUpdateDesc.txt\" && fileContents=$(cat \"$filePath\") && echo \"更新說明：$fileContents\" && appcenter codepush release-react --description $fileContents -d Production -t '~1.0.0' -a weimi/CodePushCat-android",
     "android:display-keys": "echo '安卓查詢熱更新 Key' && appcenter codepush deployment list -k -a weimi/CodePushCat-android",
     "android:release-list": "echo '安卓檢視發佈結果' && appcenter codepush deployment list -a weimi/CodePushCat-android",
     "android:gradlew-staging": "echo '安卓打包測試 apk' && cd android && ./gradlew clean && ./gradlew assembleStaging && cd ..",
@@ -20,8 +20,8 @@
 
     "ios:staging": "echo '蘋果在本機安裝測試' && deviceName='Grace' && echo \"安裝至 $deviceName 裝置\" && react-native run-ios --configuration Staging --device $deviceName",
     "ios:release": "echo '蘋果在本機安裝測試' && deviceName='Grace' && echo \"安裝至 $deviceName 裝置\" && react-native run-ios --configuration Release --device $deviceName",
-    "ios:push-staging": "echo '蘋果測試發佈' && appcenter codepush release-react -d Staging -t '*' -a weimi/CodePushCat-ios",
-    "ios:push-release": "echo '蘋果正式發佈' && appcenter codepush release-react -d Production -t '*' -a weimi/CodePushCat-ios",
+    "ios:push-staging": "echo '蘋果測試發佈' && filePath=\"CodePushUpdateDesc.txt\" && fileContents=$(cat \"$filePath\") && echo \"更新說明：$fileContents\" && appcenter codepush release-react --description $fileContents -d Staging -t '~1.0.0' -a weimi/CodePushCat-ios",
+    "ios:push-release": "echo '蘋果正式發佈' && filePath=\"CodePushUpdateDesc.txt\" && fileContents=$(cat \"$filePath\") && echo \"更新說明：$fileContents\" && appcenter codepush release-react --description $fileContents -d Production -t '~1.0.0' -a weimi/CodePushCat-ios",
     "ios:display-keys": "echo '蘋果查詢熱更新 Key' && appcenter codepush deployment list -k -a weimi/CodePushCat-ios",
     "ios:release-list": "echo '蘋果檢視發佈結果' && appcenter codepush deployment list -a weimi/CodePushCat-ios"
   },
