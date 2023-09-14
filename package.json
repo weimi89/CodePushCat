@@ -18,8 +18,8 @@
     "android:gradlew-staging": "echo '安卓打包測試 apk' && cd android && ./gradlew clean && ./gradlew assembleStaging && cd ..",
     "android:gradlew-release": "echo '安卓打包正式 apk' && cd android && ./gradlew clean && ./gradlew assembleRelease && cd ..",
 
-    "ios:staging": "echo '蘋果在本機安裝測試' && deviceName='Grace' && echo \"安裝至 $deviceName 裝置\" && react-native run-ios --configuration Staging --device $deviceName",
-    "ios:release": "echo '蘋果在本機安裝測試' && deviceName='Grace' && echo \"安裝至 $deviceName 裝置\" && react-native run-ios --configuration Release --device $deviceName",
+    "ios:staging": "echo '蘋果在本機安裝測試' && filePath=\"iOSDeviceName.txt\" && deviceName=$(cat \"$filePath\") && echo \"安裝至 $deviceName 裝置\" && react-native run-ios --configuration Staging --device $deviceName",
+    "ios:release": "echo '蘋果在本機安裝測試' && filePath=\"iOSDeviceName.txt\" && deviceName=$(cat \"$filePath\") && echo \"安裝至 $deviceName 裝置\" && react-native run-ios --configuration Release --device $deviceName",
     "ios:push-staging": "echo '蘋果測試發佈' && filePath=\"CodePushUpdateDesc.txt\" && fileContents=$(cat \"$filePath\") && echo \"更新說明：$fileContents\" && appcenter codepush release-react --description $fileContents -d Staging -t '~1.0.0' -a weimi/CodePushCat-ios",
     "ios:push-release": "echo '蘋果正式發佈' && filePath=\"CodePushUpdateDesc.txt\" && fileContents=$(cat \"$filePath\") && echo \"更新說明：$fileContents\" && appcenter codepush release-react --description $fileContents -d Production -t '~1.0.0' -a weimi/CodePushCat-ios",
     "ios:display-keys": "echo '蘋果查詢熱更新 Key' && appcenter codepush deployment list -k -a weimi/CodePushCat-ios",
