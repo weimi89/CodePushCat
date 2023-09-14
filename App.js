@@ -29,7 +29,8 @@ export default codePush(CodePushOptions)(() => {
 
   useEffect(() => {
     InteractionManager.runAfterInteractions(() => {
-      codePush.checkForUpdate(codePush.CheckFrequency.ON_APP_START)
+      codePush
+        .checkForUpdate(codePush.CheckFrequency.ON_APP_START)
         .then((remotePackage) => {
           if (!remotePackage) {
             setMessage('已是最新，不需要更新！')
@@ -52,7 +53,7 @@ export default codePush(CodePushOptions)(() => {
     remotePackage
       .download(({receivedBytes, totalBytes}) => {
         setMessage('開始下載')
-        let downloadProgress = (receivedBytes / totalBytes) * 100;
+        let downloadProgress = (receivedBytes / totalBytes) * 100
         setShowProgress(downloadProgress.toFixed(2))
       })
       .then((localPackage) => {
@@ -67,7 +68,8 @@ export default codePush(CodePushOptions)(() => {
                 codePush.notifyAppReady()
                 codePush.allowRestart() // 強制更新
                 codePush.restartApp(true)
-              }).catch((error) => {
+              })
+              .catch((error) => {
                 console.log(error)
                 setError('安裝出錯，請聯繫管理員！')
               })
