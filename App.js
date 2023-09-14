@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import { SafeAreaView, ScrollView, StatusBar, Text, useColorScheme, View } from 'react-native'
+import { SafeAreaView, ScrollView, StatusBar, Text, useColorScheme, View, InteractionManager } from 'react-native'
 import codePush from 'react-native-code-push'
 import { Colors, Header } from 'react-native/Libraries/NewAppScreen'
 
 const CodePushOptions = {
   // 檢查更新（ON_APP_START:啟動APP / ON_APP_RESUME:程序從後台控制  / MANUAL:手動控制）
-  checkFrequency: codePush.CheckFrequency.ON_APP_RESUME,
+  checkFrequency: codePush.CheckFrequency.ON_APP_START,
   // 何時安裝（ON_NEXT_RESTART:下次程序啟動 / ON_NEXT_RESUME:下次程序從後台進入前台 / ON_NEXT_SUSPEND:在後台更新 / IMMEDIATE:立即更新，並重新啟動）
   installMode: codePush.InstallMode.IMMEDIATE,
   // 重啟之前，在後台待的最短時間
@@ -22,25 +22,28 @@ const CodePushOptions = {
 export default codePush(CodePushOptions)(() => {
 
   const [message, setMessage] = useState('正在檢查更新...')
+  const [error, setError] = useState()
   const [updateDesc, setUpdateDesc] = useState()
   const [packageSize, setPackageSize] = useState()
   const [showProgress, setShowProgress] = useState()
 
   useEffect(() => {
-    codePush.checkForUpdate()
-      .then((remotePackage) => {
-        if (!remotePackage) {
-          setMessage('已是最新，不需要更新！')
-        } else {
-          setPackageSize(`${(remotePackage.packageSize / 1024 / 1024).toFixed(2)}mb`)
-          setUpdateDesc(remotePackage.description)
-          syncInNonSilent(remotePackage)
-        }
-      })
-      .catch((error) => {
-        console.log(error)
-        setMessage('檢查更新失敗')
-      })
+    InteractionManager.runAfterInteractions(() => {
+      codePush.checkForUpdate(codePush.CheckFrequency.ON_APP_START)
+        .then((remotePackage) => {
+          if (!remotePackage) {
+            setMessage('已是最新，不需要更新！')
+          } else {
+            setPackageSize(`${(remotePackage.packageSize / 1024 / 1024).toFixed(2)}mb`)
+            setUpdateDesc(remotePackage.description)
+            syncInNonSilent(remotePackage)
+          }
+        })
+        .catch((error) => {
+          console.log(error)
+          setError('檢查更新失敗')
+        })
+    })
   }, [])
 
   const syncInNonSilent = (remotePackage) => {
@@ -50,26 +53,30 @@ export default codePush(CodePushOptions)(() => {
       .download(({receivedBytes, totalBytes}) => {
         setMessage('開始下載')
         let downloadProgress = (receivedBytes / totalBytes) * 100;
-        setShowProgress(downloadProgress.toFixed(2) + "%")
+        setShowProgress(downloadProgress.toFixed(2))
       })
       .then((localPackage) => {
         // 下載完成了，呼叫這個方法
         setMessage('開始安裝')
-        localPackage
-          .install(codePush.InstallMode.IMMEDIATE)
-          .then(() => {
-            setMessage('安裝完成')
-            codePush.notifyAppReady()
-            codePush.allowRestart() // 強制更新
-            codePush.restartApp(true)
-          }).catch((error) => {
-            console.log(error)
-            setMessage('安裝出錯，請聯繫管理員！')
-          })
+        InteractionManager.runAfterInteractions(() => {
+          setTimeout(() => {
+            localPackage
+              .install(codePush.InstallMode.IMMEDIATE)
+              .then(() => {
+                setMessage('安裝完成')
+                codePush.notifyAppReady()
+                codePush.allowRestart() // 強制更新
+                codePush.restartApp(true)
+              }).catch((error) => {
+                console.log(error)
+                setError('安裝出錯，請聯繫管理員！')
+              })
+          }, 3000)
+        })
       })
       .catch((error) => {
         console.log(error)
-        setMessage('下載出錯，請聯繫管理員！')
+        setError('下載出錯，請聯繫管理員！')
       })
   }
 
@@ -90,9 +97,10 @@ export default codePush(CodePushOptions)(() => {
         style={backgroundStyle}>
         <Header />
         <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1, padding: 10 }}>
-          <Text style={{ fontSize: 20, textAlign: 'center' }}>版本號 1.0.23</Text>
+          <Text style={{ fontSize: 20, textAlign: 'center' }}>版本號 1.0.55</Text>
           <Text style={{ fontSize: 20, textAlign: 'center' }}>{message}</Text>
-          {showProgress && <Text style={{ fontSize: 20, textAlign: 'center' }}>{showProgress}</Text>}
+          {error && <Text style={{ fontSize: 20, textAlign: 'center' }}>{error}</Text>}
+          {showProgress && <Text style={{ fontSize: 20, textAlign: 'center' }}>{showProgress}%</Text>}
           {updateDesc && <Text style={{ fontSize: 20, textAlign: 'center' }}>{updateDesc}</Text>}
           {packageSize && <Text style={{ fontSize: 20, textAlign: 'center' }}>{packageSize}</Text>}
         </View>
