@@ -22,7 +22,9 @@ const CodePushOptions = {
 export default codePush(CodePushOptions)(() => {
 
   const [message, setMessage] = useState('正在檢查更新...')
-  const [showProgress, setShowProgress] = useState('0%')
+  const [updateDesc, setUpdateDesc] = useState()
+  const [packageSize, setPackageSize] = useState()
+  const [showProgress, setShowProgress] = useState()
 
   useEffect(() => {
     codePush.checkForUpdate()
@@ -30,11 +32,15 @@ export default codePush(CodePushOptions)(() => {
         if (!remotePackage || remotePackage.failedInstall) {
           setMessage('已是最新，不需要更新！')
         } else {
-          setMessage(`有新的更新！Version ${remotePackage.appVersion} (${(remotePackage.packageSize / 1024 / 1024).toFixed(2)}mb) is available for download`)
+          setPackageSize(`${(remotePackage.packageSize / 1024 / 1024).toFixed(2)}mb`)
+          setUpdateDesc(remotePackage.description)
           syncInNonSilent(remotePackage)
         }
       })
-      .catch((error) => console.log(error))
+      .catch((error) => {
+        console.log(error)
+        setMessage('檢查更新失敗')
+      })
   }, [])
 
   const syncInNonSilent = (remotePackage) => {
@@ -56,11 +62,12 @@ export default codePush(CodePushOptions)(() => {
           codePush.restartApp(true)
         }).catch((error) => {
           console.log(error)
-          setMessage('更新出錯，請聯繫管理員！')
+          setMessage('安裝出錯，請聯繫管理員！')
         })
-      }).catch((error) => {
+      })
+      .catch((error) => {
         console.log(error)
-        setMessage('更新出錯，請聯繫管理員！')
+        setMessage('下載出錯，請聯繫管理員！')
       })
   }
 
@@ -81,9 +88,11 @@ export default codePush(CodePushOptions)(() => {
         style={backgroundStyle}>
         <Header />
         <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1, padding: 10 }}>
-          <Text style={{ fontSize: 20, textAlign: 'center' }}>版本號 1.0.4</Text>
+          <Text style={{ fontSize: 20, textAlign: 'center' }}>版本號 1.0.15</Text>
           <Text style={{ fontSize: 20, textAlign: 'center' }}>{message}</Text>
-          <Text style={{ fontSize: 20, textAlign: 'center' }}>{showProgress}</Text>
+          {packageSize && <Text style={{ fontSize: 20, textAlign: 'center' }}>{packageSize}</Text>}
+          {updateDesc && <Text style={{ fontSize: 20, textAlign: 'center' }}>{updateDesc}</Text>}
+          {showProgress && <Text style={{ fontSize: 20, textAlign: 'center' }}>{showProgress}</Text>}
         </View>
       </ScrollView>
     </SafeAreaView>
